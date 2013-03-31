@@ -79,6 +79,9 @@ public:
 private:
     void OutputTextSegment( std::wstring &strTextSegment, int& segmentCount, int startIndex, int endIndex, std::ostream &outFile );
     CodeTable m_codeTable;
+
+	// 字符 -> 原始码表的编码
+	std::map<wchar_t, uint32> m_charToCodeMap;
     
     bool m_byteFlag[256];   /// 该字节是否在码表
 };

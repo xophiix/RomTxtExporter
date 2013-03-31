@@ -65,6 +65,8 @@ bool RomTxtExporter::LoadCodeTable( const wchar_t* filename )
 
         if ( codeItem.byteCount == 2 )
             m_byteFlag[ (byte)(code >> 8) ] = true;
+
+		m_charToCodeMap[ character ] = code;
     }
 
     return true;
@@ -402,7 +404,7 @@ bool RomTxtExporter::Import( const wchar_t* textFileName, NDSFileParser& ndsFile
                     textBlock.translatedText.push_back( 0x0a );
                     i += 4;
                 }
-                else if ( textBuffer[i+1] == L'n' && textBuffer[i+2] == L'>' )
+                else if ( textBuffer[i+1] == L'r' && textBuffer[i+2] == L'>' )
                 {
                     textBlock.translatedText.push_back( 0x0d );
                     i += 3;
@@ -428,6 +430,7 @@ bool RomTxtExporter::Import( const wchar_t* textFileName, NDSFileParser& ndsFile
                     }                    
                 }
 
+				//uint16 newCode = m_charToCodeMap[ textBuffer[i] ];
                 uint16 newCode = charToNewCodeMap[ textBuffer[i] ];
 
                 textBlock.translatedText.push_back( textBuffer[i] );
@@ -435,7 +438,6 @@ bool RomTxtExporter::Import( const wchar_t* textFileName, NDSFileParser& ndsFile
                 // 替换为新的编码
                 textBlock.translatedTextToImport.push_back( (char)(newCode >> 8) );
                 textBlock.translatedTextToImport.push_back( (char)newCode );
-
             }
             else if ( textBuffer[i] != 0x000a )
             {
@@ -489,14 +491,7 @@ bool RomTxtExporter::Import( const wchar_t* textFileName, NDSFileParser& ndsFile
         memcpy( pRomData + textBlock.startAddress, textBlock.translatedTextToImport.c_str(), textBlock.byteSize );
     }
 
-    if ( !ndsFile.SaveAs( L"translated.nds" ) )
-    {
-        wcout << L"导入rom失败！" << endl;
-        return false;
-    }
-
     return true;
-
 }
 
 bool RomTxtExporter::SaveCodeTable( const CodeTable& codeTable, const wchar_t* fileName )
